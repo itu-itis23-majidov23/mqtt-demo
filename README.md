@@ -30,14 +30,14 @@ No paid licence required — everything runs locally.
 ### 3.1 Clone the repository
 
 ```bash
-https://github.com/itu-itis23-majidov23/mqtt-demo.git
+git clone https://github.com/itu-itis23-majidov23/mqtt-demo.git
 cd mqtt-demo
 ```
 
 ### 3.2 Copy environment file
 
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
 Edit `.env` if you want to change the broker host, port, or publish interval (defaults work out of the box).
@@ -177,6 +177,61 @@ mqtt-demo/
 ├── AI_USAGE.md               # AI tool disclosure
 └── README.md                 # This file
 ```
+
+---
+
+## Troubleshooting
+
+### Port 1883 already in use
+
+If `docker compose up -d` fails with `address already in use`, a native Mosquitto instance is already running on your machine (common on Ubuntu, which auto-starts it after `apt install mosquitto`).
+
+Check what's using the port:
+
+```bash
+sudo lsof -i :1883
+```
+
+**Option A — stop the system Mosquitto and use Docker (recommended for the demo):**
+
+```bash
+sudo systemctl stop mosquitto
+sudo systemctl disable mosquitto   # prevent it from restarting on reboot
+docker compose up -d
+```
+
+Re-enable it afterwards if you need it:
+
+```bash
+sudo systemctl enable --now mosquitto
+```
+
+**Option B — skip Docker and use the system Mosquitto directly:**
+
+The system broker is already running and accepts anonymous connections by default. Just run the scripts against it:
+
+```bash
+python subscriber.py   # terminal 1
+python publisher.py    # terminal 2
+```
+
+No `docker compose` step needed. Everything else in the README applies as-is.
+
+**Option C — change the Docker port mapping:**
+
+Edit `docker-compose.yml` and map to a free port (e.g. `1884`), then tell the scripts to use it:
+
+```yaml
+ports:
+  - "1884:1883"
+```
+
+```bash
+MQTT_PORT=1884 python subscriber.py
+MQTT_PORT=1884 python publisher.py
+```
+
+> **Note:** The `version` field warning (`the attribute version is obsolete`) is harmless — Docker Compose v2 ignores it. It does not affect functionality.
 
 ---
 
