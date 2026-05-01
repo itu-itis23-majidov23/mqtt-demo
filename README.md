@@ -37,7 +37,7 @@ cd mqtt-demo
 ### 3.2 Copy environment file
 
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 Edit `.env` if you want to change the broker host, port, or publish interval (defaults work out of the box).
